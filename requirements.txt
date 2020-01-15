@@ -1,2 +1,4 @@
 redis
 redisgraph
+flask
+requests
