@@ -1,0 +1,41 @@
+@media screen and (max-width: 768px) {
+
+body {
+   margin-left: 5px;
+   margin-right: 5px;
+   padding-left: 0px;
+   padding-right: 0px;
+   min-width: auto;
+}
+
+article header nav .article-navigation, article footer nav .article-navigation {
+   text-align: center;
+}
+
+main {
+   flex-direction: column;
+}
+
+article {
+   margin-right: 0px;
+   min-width: auto;
+   width: auto;
+}
+
+main > aside {
+   float: none;
+   width: auto;
+   min-width: auto;
+   margin-top: 2em;
+   margin-left: 0em;
+   margin-right: 0.5em;
+   margin-bottom: 0.5em;
+   padding-right: 0em;
+   border: none;
+}
+
+main > aside > section {
+   margin-bottom: 0em;
+}
+
+}

@@ -1,0 +1,101 @@
+<html>
+<head>
+<title>
+{% if entry == None %}
+   {{ title|escape }}
+{% else %}
+   {{ entry['headline']|escape }}
+{% endif %}
+</title>
+{% if base is defined and not base == None %}
+<base href="{{url_for('loon_blog.index')}}{{base[1:]}}"/>
+{% endif %}
+{% if not entry == None %}
+<meta property="og:url"           content="{{siteURL|escape}}{{entry['path']|escape}}" />
+<meta property="og:type"          content="website" />
+<meta property="og:title"         content="{{entry['headline']|escape}}" />
+<meta property="og:description"   content="{{entry['summary']|escape}}" />
+{% endif %}
+
+<meta name=viewport content="width=device-width, initial-scale=0.8125"/>
+<link rel="stylesheet" type="text/css" href="{{url_for('loon_blog.index')}}assets/css/style.css"/>
+<link rel="stylesheet" type="text/css" href="{{url_for('loon_blog.index')}}assets/css/print.css"/>
+<link rel="stylesheet" type="text/css" href="{{url_for('loon_blog.index')}}assets/css/media.css"/>
+<script type="text/javascript">
+var page_url = "{{siteURL|escape}}{{entry['path']|escape}}";
+</script>
+{% block head %}
+{% endblock %}
+{% block head_extras %}
+{% endblock %}
+</head>
+<body class="entry">
+<header>
+{% block header_title %}<h1>My Journal</h1>{% endblock %}
+</header>
+
+
+{% block content %}
+<main>
+   <aside>
+   {% block about %}
+   {% endblock %}
+   {% if keywords|length > 0 %}
+   <section id="side-keywords">
+    <h2>Keywords</h2>
+    {% for keyword in keywords %}{% if loop.index>1 %}, {% endif %}<a href="{{url_for('loon_blog.index')}}rel/keyword/{{keyword|urlencode}}">{{keyword}}</a>{% endfor %}
+   </section>
+   {% endif %}
+   {% block sidebar %}
+   {% endblock %}
+   {% if topics|length > 0 %}
+   <section id="side-topics">
+    <h2>Topics</h2>
+    {% for keyword,count in topics %}<a href="{{url_for('loon_blog.index')}}rel/keyword/{{keyword|urlencode}}">{{keyword}}</a> ({{count}}) {% endfor %}
+   </section>
+   {% endif %}
+   </aside>
+<article>
+   <header>
+   <nav>
+   <section class="article-navigation">
+   {% if (preceding != None and following == None) %}⇐ {% endif %}
+   {% if (preceding != None) %}<a href="{{url_for('loon_blog.index')}}{{preceding['path'][1:]}}" title="preceding entry">{{preceding['headline']}}</a> {% endif %}
+   {% if (preceding != None and following !=None) %} ⇔ {% endif %}
+   {% if (following != None) %}<a href="{{url_for('loon_blog.index')}}{{following['path'][1:]}}" title="following entry">{{following['headline']}}</a>{% endif %}
+   {% if (preceding == None and following != None) %} ⇒{% endif %}
+   </section>
+   {% block nav %}
+   {% endblock %}
+   </nav>
+   <section class="info">
+   {% if not entry == None %}
+   <p class="metadata"><a href="{{url_for('loon_blog.index')}}{{entry['path'][1:]}}" title="link to this entry">&#x1f517;</a> Published on {{entry['date']|escape}} at {{entry['time']|escape}}</p>
+   {% block info %}
+   {% endblock %}
+   {% endif %}
+   </section>
+
+</header>
+
+{{ entryContent|safe }}
+
+<footer>
+<nav>
+<section class="article-navigation">
+{% if (preceding != None and following == None) %}⇐ {% endif %}
+{% if (preceding != None) %}<a href="{{url_for('loon_blog.index')}}{{preceding['path'][1:]}}">{{preceding['headline']}}</a> {% endif %}
+{% if (preceding != None and following !=None) %} ⇔ {% endif %}
+{% if (following != None) %}<a href="{{url_for('loon_blog.index')}}{{following['path'][1:]}}">{{following['headline']}}</a>{% endif %}
+{% if (preceding == None and following != None) %} ⇒{% endif %}
+</section>
+</nav>
+{% block footer %}
+{% endblock %}
+</footer>
+</article>
+</main>
+
+{% endblock %}
+</body>
+</html>

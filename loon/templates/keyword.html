@@ -1,0 +1,14 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<article class="related">
+<h1>{{keyword}}</h1>
+{% for entry in entries %}
+<section>
+<h2> ⇒ <a href="{{url_for('loon_blog.index')}}{{entry['path'][1:]|urlencode}}">{{entry['headline']|escape}}</a></h2>
+<p>{{entry['description']|safe}}
+</section>
+{% endfor %}
+</article>
+{% endblock %}
