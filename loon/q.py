@@ -39,13 +39,21 @@ return k.text""".format(article_id=article_id)
    result = graph.query(q)
    return map(lambda row : row[0],result.result_set) if len(result.result_set)>0 else None
 
-def content_location(graph,article_id):
-   q = """
+def content_location(graph,article_id=None,date=None):
+   if date==None:
+      q = """
 match (n:Article {{id: "{article_id}"}})
 match (n)-[:AssociatedMedia]->(r)
 return r.url""".format(article_id=article_id)
-   result = graph.query(q)
-   return result.result_set[0][0] if len(result.result_set)>0 else None
+      result = graph.query(q)
+      return result.result_set[0][0] if len(result.result_set)>0 else None
+   else:
+      q = """
+match (n:Article {{datePublished: "{date}"}})
+match (n)-[:AssociatedMedia]->(r)
+return r.url""".format(date=date)
+      result = graph.query(q)
+      return result.result_set[0][0] if len(result.result_set)>0 else None
 
 def keywords(graph):
    q = 'match (a:Article)-[r:LabeledWith]->(n:Keyword) return n.text,count(r)'

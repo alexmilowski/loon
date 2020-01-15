@@ -157,20 +157,18 @@ def entryByTime(dateTime):
 
    return renderEntry(entry_from_node(currentEntry))
 
-@blog.route('/journal/entry/<date>T<time>/<path:path>')
+@blog.route('/journal/entry/<dateTime>/<path:path>')
 @gzipped
-def entryMedia(date,time,path):
+def entryMedia(dateTime,path):
 
-   data = getPond(current_app.config)
+   base = content_location(get_graph(),date=dateTime)
+   if base is None:
+      abort(404)
 
-   uri = current_app.config['CACHE']['base'] + date + '/' + path
-   resource = data.getResource(uri)
-   if resource[0] == Pond.ResourceType.uri:
-      return redirect(resource[1], code=resource[2])
-   elif resource[0] == Pond.ResourceType.stream:
-      return Response(stream_with_context(resource[1]), content_type = resource[2])
-   else:
-      return send_file(resource[1])
+   base = base.rsplit('/',1)[0]
+   uri = base + '/' + path
+   req = requests.get(uri, stream = True)
+   return Response(stream_with_context(req.iter_content(20*1024)), content_type = req.headers['content-type'])
 
 @blog.route('/rel/keyword/<keyword>')
 @gzipped
