@@ -108,7 +108,7 @@ def renderEntry(entry,base=None,path=None):
 
       content = getResourceText(url)
 
-      labels = list(article_keywords(get_graph(),article_id))
+      labels = article_keywords(get_graph(),article_id)
       labels = sorted(labels if labels is not None else [],key=str.lower)
 
       topics = keywords(get_graph())
@@ -167,8 +167,12 @@ def entryMedia(dateTime,path):
 
    base = base.rsplit('/',1)[0]
    uri = base + '/' + path
-   req = requests.get(uri, stream = True)
-   return Response(stream_with_context(req.iter_content(20*1024)), content_type = req.headers['content-type'])
+
+   if current_app.config.get('REDIRECT',False):
+      return redirect(uri,code=303)
+   else:
+      req = requests.get(uri, stream = True)
+      return Response(stream_with_context(req.iter_content(20*1024)), content_type = req.headers['content-type'])
 
 @blog.route('/rel/keyword/<keyword>')
 @gzipped
