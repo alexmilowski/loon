@@ -109,7 +109,6 @@ def renderEntry(entry,base=None,path=None):
       content = getResourceText(url)
 
       labels = list(article_keywords(get_graph(),article_id))
-      print(labels)
       labels = sorted(labels if labels is not None else [],key=str.lower)
 
       topics = keywords(get_graph())

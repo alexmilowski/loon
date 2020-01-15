@@ -37,7 +37,6 @@ match (n:Article {{id: "{article_id}"}})
 match (n)-[:LabeledWith]->(k)
 return k.text""".format(article_id=article_id)
    result = graph.query(q)
-   print(result.result_set)
    return map(lambda row : row[0],result.result_set) if len(result.result_set)>0 else None
 
 def content_location(graph,article_id):
