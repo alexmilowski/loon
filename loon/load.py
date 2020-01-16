@@ -39,8 +39,13 @@ def main(call_args=None):
    is_cypher = extension==['cypher']
 
    for dir in args.dir:
+      prefix_len = len(dir)
       for root, dirs, files in os.walk(dir):
          for file in files:
+
+            current_path = root[prefix_len:]
+            if len(current_path)>0:
+               current_path += '/'
 
             fparts = file.rsplit('.',extension_count)
             if fparts[-extension_count:]==extension:
@@ -59,7 +64,7 @@ def main(call_args=None):
                   with open(source) as article_source:
                      article = Article(article_source)
                   resource = args.weburi + isoformat(article.metadata['published']) if args.weburi is not None and 'published' in article.metadata else None
-                  entry = args.entryuri + base + '.html' if args.entryuri is not None else None
+                  entry = args.entryuri + current_path + base + '.html' if args.entryuri is not None else None
 
                   query = generate_string(article,'text/x.cypher',resource=resource,source=entry)
                   if args.show_query:
