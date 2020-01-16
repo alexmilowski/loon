@@ -54,7 +54,7 @@ def gzipped(f):
 
    return view_func
 
-def getResourceText(url):
+def get_resource(url):
    req = requests.get(url)
    if (req.status_code == 200):
       contentType = req.headers.get('Content-Type')
@@ -66,7 +66,7 @@ def getResourceText(url):
       text = req.content.decode(encoding)
       return text
    else:
-      raise IOError('Cannot get <{}>, status={}'.format(uri,req.status_code))
+      raise IOError('Cannot get <{}>, status={}'.format(url,req.status_code))
 
 
 def generate_template(config,base):
@@ -91,7 +91,7 @@ def entry_from_node(node):
    entry['path'] = "/journal/entry/{}/".format(datePublished)
    return entry
 
-def renderEntry(entry,base=None,path=None):
+def render(entry,base=None,path=None):
    try:
 
       article_id = entry['id']
@@ -106,7 +106,7 @@ def renderEntry(entry,base=None,path=None):
       if preceding is not None:
          preceding = entry_from_node(preceding)
 
-      content = getResourceText(url)
+      content = get_resource(url)
 
       labels = article_keywords(get_graph(),article_id)
       labels = sorted(labels if labels is not None else [],key=str.lower)
@@ -127,7 +127,7 @@ def renderEntry(entry,base=None,path=None):
    except FileNotFoundError:
       abort(404)
 
-def renderKeyword(keyword,entries):
+def render_keyword(keyword,entries):
    try:
       return render_template_string(generate_template(current_app.config,'keyword.html'),entry=None,keyword=keyword,entries=entries)
    except FileNotFoundError:
@@ -145,21 +145,21 @@ def index():
    if currentEntry is None:
       abort(404)
 
-   return renderEntry(entry_from_node(currentEntry))
+   return render(entry_from_node(currentEntry))
 
 @blog.route('/journal/entry/<dateTime>/')
 @gzipped
-def entryByTime(dateTime):
+def entry_by_datetime(dateTime):
 
    currentEntry = article_by_published(get_graph(),dateTime)
    if currentEntry is None:
       abort(404)
 
-   return renderEntry(entry_from_node(currentEntry))
+   return render(entry_from_node(currentEntry))
 
 @blog.route('/journal/entry/<dateTime>/<path:path>')
 @gzipped
-def entryMedia(dateTime,path):
+def media(dateTime,path):
 
    base = content_location(get_graph(),date=dateTime)
    if base is None:
@@ -176,13 +176,13 @@ def entryMedia(dateTime,path):
 
 @blog.route('/rel/keyword/<keyword>')
 @gzipped
-def relKeyword(keyword):
+def rel_keyword(keyword):
 
    entries = map(
       lambda row : {'id':row[0],'datePublished':row[1],'headline':row[2],'description':row[3],'path':"/journal/entry/{}/".format(row[1])},
       labeled_with(get_graph(),keyword ) )
 
-   return renderKeyword(keyword,entries)
+   return render_keyword(keyword,entries)
 
 @blog.errorhandler(404)
 def page_not_found(error):
