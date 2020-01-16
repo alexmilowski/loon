@@ -3,13 +3,20 @@ import os
 import redis
 import argparse
 from redisgraph import Graph
+from yablog import Article, generate_string
+
+def isoformat(s):
+   return s if type(s)==str else s.isoformat()
 
 def main(call_args=None):
 
    argparser = argparse.ArgumentParser(description='Article importer')
-   argparser.add_argument('--extension',nargs='?',help='The source file extension',default='cypher')
+   argparser.add_argument('--extension',nargs='?',help='The source file extension (md or yaml for yablog; cypher for direct cypher)',default='cypher')
    argparser.add_argument('--host',help='Redis host',default='0.0.0.0')
    argparser.add_argument('--port',help='Redis port',type=int,default=6379)
+   argparser.add_argument('--weburi',help='The article base web uri (e.g., http://example.com/journal/entry/)')
+   argparser.add_argument('--entryuri',help='The article source base uri (e.g., http://example.github.io/journal/)')
+   argparser.add_argument('--show-query',help='Show the cypher queries before they are run.',action='store_true',default=False)
    argparser.add_argument('graph',help='The graph name')
    argparser.add_argument('dir',nargs='+',help='The directories to process.')
 
@@ -20,16 +27,45 @@ def main(call_args=None):
 
    graph = Graph(args.graph,r)
 
+   extension = '.' + args.extension if args.extension[0]!='.' else args.extension
+   extension_count = extension.count('.')
+   extension = extension.rsplit('.')[-extension_count:]
+
+   if args.weburi is not None and args.weburi[-1]!='/':
+      args.weburi += '/'
+   if args.entryuri is not None and args.entryuri[-1]!='/':
+      args.entryuri += '/'
+
+   is_cypher = extension==['cypher']
+
    for dir in args.dir:
       for root, dirs, files in os.walk(dir):
          for file in files:
-            if file.rsplit('.',1)[-1]==args.extension:
-               query = root + os.sep + file
-               print(query)
 
-               with open(query) as query_source:
-                  q = query_source.read()
-                  result = graph.query(q)
+            fparts = file.rsplit('.',extension_count)
+            if fparts[-extension_count:]==extension:
+               base = fparts[0]
+               source = root + os.sep + file
+               print(source)
+
+               if is_cypher:
+                  with open(source) as query_source:
+                     query = query_source.read()
+                  if args.show_query:
+                     print(query)
+                  result = graph.query(query)
+               else:
+                  # assume yablog
+                  with open(source) as article_source:
+                     article = Article(article_source)
+                  resource = args.weburi + isoformat(article.metadata['published']) if args.weburi is not None and 'published' in article.metadata else None
+                  entry = args.entryuri + base + '.html' if args.entryuri is not None else None
+
+                  query = generate_string(article,'text/x.cypher',resource=resource,source=entry)
+                  if args.show_query:
+                     print(query)
+                  result = graph.query(query)
+
 
                print("""
                runtime: {runtime}ms
