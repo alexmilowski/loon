@@ -80,7 +80,7 @@ def local_proxy(base,directory):
 
 def get_content_proxy():
    if 'proxy' not in g:
-      if 'PROXY_CONTENT' not in current_app.config:
+      if current_app.config.get('PROXY_CONTENT') is None:
          g.proxy = get_resource
       else:
          proxy_def = current_app.config['PROXY_CONTENT']
