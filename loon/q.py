@@ -74,13 +74,14 @@ def main(call_args=None):
    argparser = argparse.ArgumentParser(description='Query')
    argparser.add_argument('--host',help='Redis host',default='0.0.0.0')
    argparser.add_argument('--port',help='Redis port',type=int,default=6379)
+   argparser.add_argument('--password',help='Redis password')
    argparser.add_argument('graph',help='The graph name')
    argparser.add_argument('name',help='The query name')
    argparser.add_argument('args',nargs='*',help='The query arguments')
 
    args = argparser.parse_args(call_args if call_args is not None else sys.argv)
 
-   r = redis.Redis(host=args.host,port=args.port)
+   r = redis.Redis(host=args.host,port=args.port,password=args.password)
    graph = Graph(args.graph,r)
 
    if args.name=='q':

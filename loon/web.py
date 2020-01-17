@@ -13,7 +13,7 @@ from loon import current_article, following_article, preceding_article, article_
 
 def get_graph():
    if 'graph' not in g:
-      r = redis.Redis(host=current_app.config['REDIS_HOST'],port=int(current_app.config['REDIS_PORT']))
+      r = redis.Redis(host=current_app.config['REDIS_HOST'],port=int(current_app.config['REDIS_PORT']),password=current_app.config.get('REDIS_PASSWORD'))
       g.graph = Graph(current_app.config['GRAPH'],r)
    return g.graph
 
@@ -198,7 +198,7 @@ def send_asset(path):
       dir = __file__[:__file__.rfind('/')] + '/assets/'
    return send_from_directory(dir, path)
 
-def create_app(host='0.0.0.0',port=6379,graph='test',app=None):
+def create_app(host='0.0.0.0',port=6379,graph='test',password=None,app=None):
    if app is None:
       app = Flask(__name__)
    app.register_blueprint(blog)
@@ -207,6 +207,8 @@ def create_app(host='0.0.0.0',port=6379,graph='test',app=None):
       app.config['REDIS_HOST'] = host
    if 'REDIS_PORT' not in app.config:
       app.config['REDIS_PORT'] = port
+   if 'REDIS_PASSWORD' not in app.config:
+      app.config['REDIS_PASSWORD'] = password
    if 'GRAPH' not in app.config:
       app.config['GRAPH'] = graph
    return app
@@ -215,11 +217,12 @@ def main(call_args=None):
    argparser = argparse.ArgumentParser(description='Web')
    argparser.add_argument('--host',help='Redis host',default='0.0.0.0')
    argparser.add_argument('--port',help='Redis port',type=int,default=6379)
+   argparser.add_argument('--password',help='Redis password')
    argparser.add_argument('--config',help='configuration file')
    argparser.add_argument('graph',help='The graph name')
    args = argparser.parse_args(call_args if call_args is not None else sys.argv)
 
-   app = create_app(host=args.host,port=args.port,graph=args.graph)
+   app = create_app(host=args.host,port=args.port,password=args.password,graph=args.graph)
    if args.config is not None:
       import os
       app.config.from_pyfile(os.path.abspath(args.config))

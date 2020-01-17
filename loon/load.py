@@ -14,6 +14,7 @@ def main(call_args=None):
    argparser.add_argument('--extension',nargs='?',help='The source file extension (md or yaml for yablog; cypher for direct cypher)',default='cypher')
    argparser.add_argument('--host',help='Redis host',default='0.0.0.0')
    argparser.add_argument('--port',help='Redis port',type=int,default=6379)
+   argparser.add_argument('--password',help='Redis password')
    argparser.add_argument('--weburi',help='The article base web uri (e.g., http://example.com/journal/entry/)')
    argparser.add_argument('--entryuri',help='The article source base uri (e.g., http://example.github.io/journal/)')
    argparser.add_argument('--show-query',help='Show the cypher queries before they are run.',action='store_true',default=False)
@@ -23,7 +24,7 @@ def main(call_args=None):
    args = argparser.parse_args(call_args if call_args is not None else sys.argv)
 
    print('Connecting to '+args.host+':'+str(args.port)+' for graph '+args.graph)
-   r = redis.Redis(host=args.host,port=args.port)
+   r = redis.Redis(host=args.host,port=args.port,password=args.password)
 
    graph = Graph(args.graph,r)
 
