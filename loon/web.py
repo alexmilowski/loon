@@ -17,7 +17,6 @@ def get_graph():
       g.graph = Graph(current_app.config['GRAPH'],r)
    return g.graph
 
-
 def gzipped(f):
    @functools.wraps(f)
    def view_func(*args, **kwargs):
@@ -68,6 +67,30 @@ def get_resource(url):
    else:
       raise IOError('Cannot get <{}>, status={}'.format(url,req.status_code))
 
+def local_proxy(base,directory):
+
+   def content_proxy(url):
+      if url[:len(base)]==base:
+         path = directory + url[len(base):]
+         with open(path) as file:
+            return file.read()
+      else:
+         return get_resource(url)
+   return content_proxy
+
+def get_content_proxy():
+   if 'proxy' not in g:
+      if 'PROXY_CONTENT' not in current_app.config:
+         g.proxy = get_resource
+      else:
+         proxy_def = current_app.config['PROXY_CONTENT']
+         if proxy_def.get('type','local')=='local':
+            g.proxy = local_proxy(proxy_def['base'],proxy_def['directory'])
+         else:
+            raise ValueError('Unrecognied proxy type: {}'.format(proxy_def['type']))
+   return g.proxy
+
+
 
 def generate_template(config,base):
    options = config.get('TEMPLATE_OPTIONS')
@@ -106,7 +129,7 @@ def render(entry,base=None,path=None):
       if preceding is not None:
          preceding = entry_from_node(preceding)
 
-      content = get_resource(url)
+      content = get_content_proxy()(url)
 
       labels = article_keywords(get_graph(),article_id)
       labels = sorted(labels if labels is not None else [],key=str.lower)
