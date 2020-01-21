@@ -7,6 +7,7 @@ import argparse
 import logging
 from io import StringIO
 import redis
+from urllib.parse import unquote, unquote_plus
 from redisgraph import Graph
 
 from loon import current_article, following_article, preceding_article, article_by_published, article_by_id, article_keywords, content_location, keywords, labeled_with
@@ -105,6 +106,12 @@ def generate_template(config,base):
 
 def siteURL(config,request):
    u = current_app.config.get('SITE_URL')
+   if u is None:
+      path = request.headers.get('x-aws-path')
+      if path is not None:
+         u = request.url_root[0:-1] + path[0:-len(request.path)]
+      else:
+         u = request.url_root[0:-1]
    return u if u is not None else request.url_root[0:-1]
 
 def entry_from_node(node):
@@ -152,7 +159,12 @@ def render(entry,base=None,path=None):
 
 def render_keyword(keyword,entries):
    try:
-      return render_template_string(generate_template(current_app.config,'keyword.html'),entry=None,keyword=keyword,entries=entries)
+      return render_template_string(
+         generate_template(current_app.config,'keyword.html'),
+         siteURL=siteURL(current_app.config,request),
+         entry=None,
+         keyword=keyword,
+         entries=entries)
    except FileNotFoundError:
       abort(404)
 
@@ -200,6 +212,9 @@ def media(dateTime,path):
 @blog.route('/rel/keyword/<keyword>')
 @gzipped
 def rel_keyword(keyword):
+
+   keyword = unquote_plus(keyword)
+   keyword = unquote(keyword)
 
    entries = map(
       lambda row : {'id':row[0],'datePublished':row[1],'headline':row[2],'description':row[3],'path':"/journal/entry/{}/".format(row[1])},
