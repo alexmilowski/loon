@@ -6,7 +6,7 @@
 <h1>{{keyword}}</h1>
 {% for entry in entries %}
 <section>
-<h2> ⇒ <a href="{{url_for('loon_blog.index')}}{{entry['path'][1:]|urlencode}}">{{entry['headline']|escape}}</a></h2>
+<h2> ⇒ <a href="{{siteURL|escape}}{{url_for('loon_blog.index')}}{{entry['path'][1:]}}">{{entry['headline']|escape}}</a></h2>
 <p>{{entry['description']|safe}}
 </section>
 {% endfor %}
