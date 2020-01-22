@@ -29,7 +29,7 @@ var page_url = "{{siteURL|escape}}{{entry['path']|escape}}";
 {% block head_extras %}
 {% endblock %}
 </head>
-<body class="entry">
+<body>
 <header>
 {% block header_title %}<h1>My Journal</h1>{% endblock %}
 </header>
@@ -55,7 +55,7 @@ var page_url = "{{siteURL|escape}}{{entry['path']|escape}}";
    </section>
    {% endif %}
    </aside>
-<article>
+<article class="entry">
    <header>
    <nav>
    <section class="article-navigation">
