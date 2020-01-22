@@ -31,6 +31,11 @@ def article_by_id(graph,article_id):
    result = graph.query(q)
    return result.result_set[0][0] if len(result.result_set)>0 else None
 
+def delete_article_by_id(graph,article_id):
+   q = 'match (n:Article {{id: "{article_id}"}}) detach delete n'.format(article_id=article_id)
+   result = graph.query(q)
+   return result.result_set[0][0] if len(result.result_set)>0 else None
+
 def article_keywords(graph,article_id):
    q = """
 match (n:Article {{id: "{article_id}"}})
@@ -98,6 +103,10 @@ def main(call_args=None):
    elif args.name=='id':
       for article_id in args.args:
          result = article_by_id(graph,article_id)
+         print(result)
+   elif args.name=='delete':
+      for article_id in args.args:
+         result = delete_article_by_id(graph,article_id)
          print(result)
    elif args.name=='keywords_for':
       for article_id in args.args:
