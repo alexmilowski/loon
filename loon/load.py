@@ -3,7 +3,7 @@ import os
 import redis
 import argparse
 from redisgraph import Graph
-from yablog import Article, generate_string
+from yamlblog import Article, generate_string
 
 def isoformat(s):
    return s if type(s)==str else s.isoformat()
