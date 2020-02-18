@@ -180,7 +180,9 @@ def index():
    if currentEntry is None:
       abort(404)
 
-   return render(entry_from_node(currentEntry))
+   entry = entry_from_node(currentEntry)
+
+   return render(entry,base='/journal/entry/{datePublished}/'.format(datePublished=entry['datePublished']))
 
 @blog.route('/journal/entry/<dateTime>/')
 @gzipped
