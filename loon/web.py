@@ -9,6 +9,7 @@ from io import StringIO
 import redis
 from urllib.parse import unquote, unquote_plus
 from redisgraph import Graph
+import os
 
 from loon import current_article, following_article, preceding_article, article_by_published, article_by_id, article_keywords, content_location, keywords, labeled_with
 
@@ -236,6 +237,8 @@ def send_asset(path):
    dir = current_app.config.get('ASSETS')
    if dir is None:
       dir = __file__[:__file__.rfind('/')] + '/assets/'
+   else:
+      dir = os.path.abspath(dir)
    return send_from_directory(dir, path)
 
 def create_app(host='0.0.0.0',port=6379,graph='test',password=None,app=None):
